@@ -5,6 +5,7 @@
  import { LogIn, User, Lock } from 'lucide-react';
  
  export function LoginForm() {
+ }
 @@ .. @@
            <div className="mt-8 pt-6 border-t border-gray-200">
              <p className="text-sm text-gray-600 mb-4 text-center">Demo Accounts:</p>
