@@ -228,7 +228,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating project:', error);
+      throw error;
+    }
 
     // Create default stages for the new project
     const defaultStages = [
@@ -248,7 +251,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       approval_status: 'pending' as const
     }));
 
-    await supabase.from('stages').insert(stageInserts);
+    const { error: stageError } = await supabase.from('stages').insert(stageInserts);
+    if (stageError) {
+      console.error('Error creating project stages:', stageError);
+      throw stageError;
+    }
     
     await refreshData();
   };
@@ -259,7 +266,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update(updates)
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
     await loadProjects();
   };
 
@@ -269,7 +279,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting project:', error);
+      throw error;
+    }
     await refreshData();
   };
 
@@ -280,7 +293,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update({ progress_percentage: progress })
       .eq('id', stageId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating stage progress:', error);
+      throw error;
+    }
     await loadStages();
   };
 
@@ -290,7 +306,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update({ approval_status: status })
       .eq('id', stageId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating stage approval:', error);
+      throw error;
+    }
 
     if (comment) {
       const stage = stages.find(s => s.id === stageId);
@@ -316,7 +335,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .from('comment_tasks')
       .insert([data]);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error adding comment task:', error);
+      throw error;
+    }
     await loadCommentTasks();
   };
 
@@ -326,7 +348,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update({ status })
       .eq('id', taskId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating comment task status:', error);
+      throw error;
+    }
     await loadCommentTasks();
   };
 
@@ -336,7 +361,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .from('files')
       .insert([fileData]);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
     await loadFiles();
   };
 
@@ -351,12 +379,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
       })
       .eq('id', fileId);
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      console.error('Error updating file download count:', updateError);
+      throw updateError;
+    }
 
     // Add to download history
     const file = files.find(f => f.id === fileId);
     if (file) {
-      await supabase
+      const { error: historyError } = await supabase
         .from('download_history')
         .insert([{
           file_id: fileId,
@@ -365,6 +396,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
           file_name: file.filename,
           file_size: file.size
         }]);
+      
+      if (historyError) {
+        console.error('Error adding to download history:', historyError);
+        throw historyError;
+      }
     }
 
     await Promise.all([loadFiles(), loadDownloadHistory()]);
@@ -376,7 +412,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update(metadata)
       .eq('id', fileId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating file metadata:', error);
+      throw error;
+    }
     await loadFiles();
   };
 
@@ -386,7 +425,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .from('leads')
       .insert([{ ...leadData, created_by: user!.id }]);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating lead:', error);
+      throw error;
+    }
     await loadLeads();
   };
 
@@ -396,7 +438,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update(updates)
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating lead:', error);
+      throw error;
+    }
     await loadLeads();
   };
 
@@ -406,7 +451,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting lead:', error);
+      throw error;
+    }
     await loadLeads();
   };
 
@@ -418,7 +466,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating brochure project:', error);
+      throw error;
+    }
     await loadBrochureProjects();
     return data.id;
   };
@@ -429,7 +480,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update(updates)
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating brochure project:', error);
+      throw error;
+    }
     await loadBrochureProjects();
   };
 
@@ -441,7 +495,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ignoreDuplicates: false 
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error saving brochure page:', error);
+      throw error;
+    }
     await loadBrochurePages();
   };
 
@@ -456,7 +513,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .from('page_comments')
       .insert([commentData]);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error adding page comment:', error);
+      throw error;
+    }
     await loadPageComments();
   };
 
@@ -472,7 +532,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .update({ approval_status: status })
       .eq('id', pageId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error approving brochure page:', error);
+      throw error;
+    }
 
     if (comment) {
       const actionText = status === 'approved' 
@@ -504,7 +567,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       })
       .eq('id', pageId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error locking brochure page:', error);
+      throw error;
+    }
     await loadBrochurePages();
   };
 
@@ -519,7 +585,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       })
       .eq('id', pageId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error unlocking brochure page:', error);
+      throw error;
+    }
     await loadBrochurePages();
   };
 
